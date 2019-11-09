@@ -72,8 +72,15 @@ def normalize(x: np.ndarray):
     # return x / np.linalg.norm(x)
 
 
-def main(argv: list) -> int:
+def u_to_kg(m):
+    return 1.66053904e-27 * m
 
+
+def J_to_eV(E):
+    return E / 1.602176634e-19
+
+
+def aufgabe_1(plot=True):
     use_radius = True
 
     theta, phi = np.mgrid[0: np.pi: 80j, 0: 2 * np.pi: 160j]
@@ -85,28 +92,60 @@ def main(argv: list) -> int:
     functions = [psi_1_sp1, psi_2_sp1, psi_1_sp2, psi_2_sp2, psi_1_sp3, psi_2_sp3, psi_3_sp3, psi_4_sp3]
 
     for f in functions:
-        fig = plt.figure(figsize=(10, 8))
-
-        ax = fig.gca(projection="3d")
         c = abs_sq(f(theta, phi))
 
         if use_radius:
             r = c
             x, y, z = spherical_to_cartesian(r, theta, phi)
 
-        color = cm.viridis(normalize(c))
+        if plot:
+            fig = plt.figure(figsize=(10, 8))
 
-        cax = ax.plot_surface(x, y, z, facecolors=color, antialiased=False, cmap="viridis", vmin=c.min(), vmax=c.max())
+            ax = fig.gca(projection="3d")
 
-        cbar = fig.colorbar(cax)
+            color = cm.viridis(normalize(c))
 
-        cbar.ax.set_yticklabels(np.round(np.linspace(c.min(), c.max(), 9), 3))
+            cax = ax.plot_surface(x, y, z, facecolors=color, antialiased=False, cmap="viridis", vmin=c.min(), vmax=c.max())
 
-        plt.title(f.__name__)
-        plt.xlabel("x")
-        plt.ylabel("y")
+            cbar = fig.colorbar(cax)
 
-        plt.show()
+            cbar.ax.set_yticklabels(np.round(np.linspace(c.min(), c.max(), 9), 3))
+
+            plt.title(f.__name__)
+            plt.xlabel("x")
+            plt.ylabel("y")
+
+            plt.show()
+
+
+def aufgabe_2():
+    def energy(v, l, nu, I):
+        return (v + 0.5) * consts.hbar * 2 * consts.pi * nu + l * (l + 1) * consts.hbar ** 2 / (2 * I)
+
+    mH = u_to_kg(1.008)  # kg
+    mCl = u_to_kg(35.45)  # kg
+
+    m = mH * mCl / (mH + mCl)  # kg
+    R = 127.5e-12  # m
+
+    I = m * R ** 2  # kg m^2
+
+    l1s = [1, 2, 3, 2]
+    l2s = [0, 1, 4, 3]
+
+    v1 = 0
+    v2 = 1
+
+    nu = consts.c * 2988.9e2  # s^-1
+
+    for l1, l2 in zip(l1s, l2s):
+        delta_E = abs(energy(v1, l1, nu, I) - energy(v2, l2, nu, I))
+        print("delta_E =", delta_E, "J =", J_to_eV(delta_E), "eV =", delta_E * 1e-12 / consts.h, "THz")
+
+
+def main(argv: list) -> int:
+    aufgabe_1(plot=False)
+    aufgabe_2()
 
     return 0
 

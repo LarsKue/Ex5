@@ -144,7 +144,7 @@ def aufgabe_2():
 
 
 def main(argv: list) -> int:
-    aufgabe_1(plot=False)
+    aufgabe_1(plot=True)
     aufgabe_2()
 
     return 0
